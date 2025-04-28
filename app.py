@@ -1092,11 +1092,29 @@ In un'ottica di lungo periodo, ENAV rappresenta una potenziale "yield play" inte
     """)
 
 st.markdown("---")
-st.caption("Disclaimer: Questa è un'analisi basata sui dati forniti. Non costituisce consulenza finanziaria. Effettuare sempre le proprie ricerche prima di investire.")
+
+# Disclaimer aggiornato con formattazione migliore
+st.markdown("""
+<div style="background-color: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 5px solid #007bff;">
+    <h3 style="color: #007bff; margin-top: 0;">DISCLAIMER</h3>
+    <p style="font-size: 14px;">
+    Le informazioni contenute in questa presentazione sono fornite esclusivamente a scopo informativo generale e/o educativo. 
+    Non costituiscono e non devono essere interpretate come consulenza finanziaria, legale, fiscale o di investimento.
+    </p>
+    <p style="font-size: 14px;">
+    Investire nei mercati finanziari comporta rischi significativi, inclusa la possibilità di perdere l'intero capitale investito. 
+    Le performance passate non sono indicative né garanzia di risultati futuri.
+    </p>
+    <p style="font-size: 14px;">
+    Si raccomanda vivamente di condurre la propria analisi approfondita (due diligence) e di consultare un consulente finanziario 
+    indipendente e qualificato prima di prendere qualsiasi decisione di investimento.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 # Aggiungi firma
 st.markdown("""
 <div style="text-align: center; margin-top: 20px;">
-    <p style="font-style: italic; color: #888;">Analisi generata tramite Dividend App Generator</p>
+    <p style="font-style: italic; color: #888;">Realizzazione a cura della Barba Sparlante</p>
 </div>
 """, unsafe_allow_html=True)
