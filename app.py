@@ -492,41 +492,127 @@ grazie alla forte posizione di cassa e alla generazione di Free Cash Flow.
 
 col1, col2 = st.columns(2)
 
-# GRAFICO 5: Reset Regolatorio e EBITDA
+# GRAFICO 5: Reset Regolatorio e EBITDA - Versione migliorata
 with col1:
-    fig_reset = px.line(
-        df_ebitda_reset,
-        x='Anno',
-        y='EBITDA (€M)',
-        title="EBITDA e Impatto Reset Regolatorio RP4",
-        markers=True,
-        text='EBITDA (€M)',
-        color='Fase',
-        color_discrete_map={'Attuale': 'blue', 'Post-Reset': 'red', 'Recupero': 'green'}
+    # Creiamo un grafico combinato per una migliore comprensione
+    fig_reset = go.Figure()
+    
+    # Aggiungiamo le barre per l'EBITDA con colori diversi per ciascuna fase
+    for fase in df_ebitda_reset['Fase'].unique():
+        df_filtrato = df_ebitda_reset[df_ebitda_reset['Fase'] == fase]
+        
+        # Assegniamo colori più distintivi per fase
+        colore = 'rgba(65, 105, 225, 0.8)' if fase == 'Attuale' else 'rgba(220, 20, 60, 0.8)' if fase == 'Post-Reset' else 'rgba(46, 139, 87, 0.8)'
+        
+        fig_reset.add_trace(go.Bar(
+            x=df_filtrato['Anno'],
+            y=df_filtrato['EBITDA (€M)'],
+            name=fase,
+            text=df_filtrato['EBITDA (€M)'].astype(int).astype(str) + "M€",
+            textposition='auto',
+            marker_color=colore,
+            width=0.6
+        ))
+    
+    # Aggiungiamo la linea di tendenza per mostrare l'andamento generale
+    fig_reset.add_trace(go.Scatter(
+        x=df_ebitda_reset['Anno'],
+        y=df_ebitda_reset['EBITDA (€M)'],
+        mode='lines+markers',
+        line=dict(color='rgba(0, 0, 0, 0.7)', width=2, dash='dot'),
+        showlegend=False
+    ))
+    
+    # Evidenziamo il calo dal 2024 al 2025 con una freccia e percentuale
+    fig_reset.add_shape(
+        type="line",
+        x0='2024E', y0=311,
+        x1='2025E', y1=225,
+        line=dict(color="red", width=2, dash="dot"),
+        xref='x', yref='y'
     )
-    fig_reset.update_traces(texttemplate='%{y}M', textposition="top center")
+    
+    # Aggiungiamo frecce e annotazioni più chiare
+    fig_reset.add_annotation(
+        x='2024E', y=311,
+        xshift=20,
+        text="€311M",
+        showarrow=False,
+        font=dict(size=12, color="navy")
+    )
+    
     fig_reset.add_annotation(
         x='2025E', y=225,
-        text="Reset -28%",
+        xshift=15, yshift=-25,
+        text="€225M<br><b>-28%</b>",
         showarrow=True,
         arrowhead=2,
+        arrowcolor="red",
         arrowwidth=2,
         arrowsize=1,
-        ax=0,
-        ay=30
+        ax=-25, ay=30
     )
+    
+    # Evidenziamo la crescita dal 2025 al 2029
+    fig_reset.add_annotation(
+        x='2027E', y=285,
+        text="Fase di Recupero",
+        showarrow=False,
+        font=dict(size=12, color="darkgreen")
+    )
+    
     fig_reset.add_annotation(
         x='2029E', y=361,
-        text="CAGR +12.5%<br>dal 2025",
+        xshift=0, yshift=20,
+        text="€361M<br><b>+60%</b> vs 2025<br>CAGR +12.5%",
         showarrow=True,
         arrowhead=2,
+        arrowcolor="green",
         arrowwidth=2,
         arrowsize=1,
-        ax=0,
-        ay=-40
+        ax=0, ay=-40
     )
-    fig_reset.update_layout(xaxis_title="Anno", yaxis_title="EBITDA (€M)")
+    
+    # Aggiungiamo area evidenziata per il periodo di recupero
+    fig_reset.add_vrect(
+        x0='2025E', x1='2029E',
+        fillcolor="rgba(50, 205, 50, 0.1)",
+        layer="below",
+        line_width=0,
+        annotation_text="Periodo di Recupero RP4",
+        annotation_position="top right",
+        annotation=dict(font_size=10, font_color="green")
+    )
+    
+    # Titolo e layout
+    fig_reset.update_layout(
+        title={
+            'text': "Impatto del Reset Regolatorio RP4 sull'EBITDA",
+            'font': {'size': 16}
+        },
+        xaxis_title="Anno",
+        yaxis_title="EBITDA (€M)",
+        legend_title="Fase",
+        barmode='group',
+        bargap=0.15,
+        bargroupgap=0.1,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        yaxis=dict(
+            tickformat=",.0f",
+            gridcolor='rgba(0,0,0,0.1)'
+        )
+    )
+    
     st.plotly_chart(fig_reset, use_container_width=True)
+    
+    # Aggiungiamo una piccola spiegazione sotto il grafico
+    st.caption("**Nota sul Reset Regolatorio**: Il calo dell'EBITDA nel 2025 (-28%) è un fenomeno regolatorio previsto e gestibile, seguito da una fase di recupero con crescita annua del 12.5% fino al 2029.")
 
 # GRAFICO 6: Confronto Yield
 with col2:
