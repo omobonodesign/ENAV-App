@@ -312,38 +312,103 @@ st.subheader("📊 Sostenibilità e Proiezioni del Dividendo")
 # Layout a 2 colonne per i grafici
 col1, col2 = st.columns(2)
 
-# GRAFICO 3: Payout Ratio - nella prima colonna
+# GRAFICO 3: Payout Ratio migliorato - nella prima colonna
 with col1:
-    fig_payout = px.bar(
-        df_payout[df_payout['DPS (€)'] > 0],  # Esclude gli anni senza dividendi
-        x='Anno',
-        y='Payout Ratio (% di EPS)',
-        title="Payout Ratio (DPS/EPS) %",
-        text='Payout Ratio (% di EPS)',
-        color='Payout Ratio (% di EPS)',
-        color_continuous_scale=px.colors.sequential.Greens
-    )
-    fig_payout.update_traces(texttemplate='%{y:.1f}%', textposition="outside")
-    fig_payout.update_layout(xaxis_title="Anno", yaxis_title="Payout Ratio (% dell'EPS)")
+    # Creamo un grafico combinato che mostri entrambi i tipi di payout ratio
+    fig_payout = go.Figure()
     
-    # Aggiungi linea target policy
+    # Filtriamo gli anni con dividendi positivi
+    df_payout_filtered = df_payout[df_payout['DPS (€)'] > 0]
+    
+    # Aggiungiamo barre per il payout ratio rispetto all'EPS
+    fig_payout.add_trace(go.Bar(
+        x=df_payout_filtered['Anno'],
+        y=df_payout_filtered['Payout Ratio (% di EPS)'],
+        name='% dell\'EPS',
+        text=df_payout_filtered['Payout Ratio (% di EPS)'].round(1).astype(str) + '%',
+        textposition="outside",
+        marker_color='rgba(0, 128, 0, 0.7)',
+    ))
+    
+    # Aggiungiamo barre per il payout ratio rispetto al FCF dove FCF è positivo
+    df_payout_fcf = df_payout_filtered[df_payout_filtered['FCF per Share (€)'] > 0]
+    fig_payout.add_trace(go.Bar(
+        x=df_payout_fcf['Anno'],
+        y=df_payout_fcf['Payout Ratio (% di FCF)'],
+        name='% del FCF',
+        text=df_payout_fcf['Payout Ratio (% di FCF)'].round(1).astype(str) + '%',
+        textposition="outside",
+        marker_color='rgba(65, 105, 225, 0.7)',
+        visible='legendonly'  # Inizialmente nascosto, attivabile dalla legenda
+    ))
+    
+    # Aggiungiamo linea target policy (80% del FCF)
     fig_payout.add_shape(
         type="line",
-        x0=df_payout['Anno'].min()-0.5,
-        x1=df_payout['Anno'].max()+0.5,
+        x0=df_payout_filtered['Anno'].min()-0.5,
+        x1=df_payout_filtered['Anno'].max()+0.5,
         y0=80,
         y1=80,
         line=dict(color="red", width=2, dash="dash"),
     )
+    
     fig_payout.add_annotation(
-        x=2024,
+        x=df_payout_filtered['Anno'].max(),
         y=85,
         text="Target Payout: 80% del FCF",
         showarrow=False,
         font=dict(color="red")
     )
     
+    # Aggiungiamo annotazione per spiegare il payout ratio alto nel 2021
+    if df_payout_filtered['Anno'].min() <= 2021 <= df_payout_filtered['Anno'].max():
+        eps_2021 = df_payout_filtered.loc[df_payout_filtered['Anno'] == 2021, 'Payout Ratio (% di EPS)'].values[0]
+        if eps_2021 > 70:  # Solo se è un valore alto
+            fig_payout.add_annotation(
+                x=2021,
+                y=eps_2021,
+                text="EPS impattato<br>dal COVID",
+                showarrow=True,
+                arrowhead=2,
+                arrowsize=1,
+                arrowwidth=1,
+                arrowcolor="green",
+                ax=25,
+                ay=-30
+            )
+    
+    fig_payout.update_layout(
+        title={
+            'text': "Payout Ratio di ENAV",
+            'font': {'size': 16}
+        },
+        xaxis_title="Anno",
+        yaxis_title="Payout Ratio (%)",
+        barmode='group',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        yaxis=dict(
+            range=[0, max(df_payout_filtered['Payout Ratio (% di EPS)'].max(), 
+                          df_payout_fcf['Payout Ratio (% di FCF)'].max() if not df_payout_fcf.empty else 0) * 1.15]
+        )
+    )
+    
     st.plotly_chart(fig_payout, use_container_width=True)
+    
+    # Aggiungiamo una spiegazione più chiara sotto il grafico
+    st.info("""
+    **Note sul Payout Ratio:**
+    - ENAV ha una politica di dividendi basata sull'80% del Free Cash Flow (FCF)
+    - Il grafico mostra il dividendo come percentuale dell'Utile per Azione (EPS)
+    - È possibile visualizzare anche il ratio basato sul FCF attivandolo dalla legenda (solo per anni con FCF positivo)
+    - Nel 2021, il FCF era negativo a causa degli impatti COVID, ma la società ha comunque ripreso la distribuzione dei dividendi
+    """)
+
 
 # GRAFICO 4: FCF vs Dividend Paid - nella seconda colonna
 with col2:
