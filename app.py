@@ -26,16 +26,16 @@ CRESCITA_ATTESA_DPS_2024 = "+17.4%"  # Crescita rispetto al 2023
 YIELD_ATTUALE = round((ULTIMO_DPS_PAGATO_VAL / PREZZO_RIFERIMENTO_APPROX) * 100, 2)
 YIELD_FORWARD = round((DPS_ATTESO_2024_VAL / PREZZO_RIFERIMENTO_APPROX) * 100, 2)
 
-# Dati storici Dividendo Per Azione (DPS)
+# Dati storici Dividendo Per Azione (DPS) - CORRETTO per il 2019
 dps_storico_data = {
     'Anno Esercizio': [2019, 2020, 2021, 2022, 2023, 2024],
-    'DPS (€)': [0.0, 0.0, 0.1081, 0.1967, 0.23, 0.27],  # 2024 proposto
+    'DPS (€)': [0.21, 0.0, 0.1081, 0.1967, 0.23, 0.27],  # 2024 proposto, 2019 corretto
     'Nota': ['Pre-Covid', 'Covid (Cancellato)', 'Ripresa', 'Crescita', 'Record', 'Proposto'],
     'Tipo': ['Storico', 'Storico', 'Storico', 'Storico', 'Storico', 'Proposto']
 }
 df_dps = pd.DataFrame(dps_storico_data)
 
-# Dati Finanziari Chiave
+# Dati Finanziari Chiave - CORRETTO per il 2019
 fin_data = {
     'Metrica': [
         'Ricavi Totali (€M)',
@@ -57,7 +57,7 @@ fin_data = {
         -101.76, # Capex
         225.32,  # FCF
         'Cassa Netta', # Leva
-        0.0      # DPS
+        0.21      # DPS - CORRETTO
     ],
     '2020': [
         780.87,  # Revenue
@@ -117,7 +117,7 @@ fin_data = {
 }
 df_fin = pd.DataFrame(fin_data)
 
-# Creazione di un DataFrame più pulito per grafici finanziari
+# Creazione di un DataFrame più pulito per grafici finanziari - CORRETTO per il 2019
 df_fin_clean = pd.DataFrame({
     'Anno': ['2019', '2020', '2021', '2022', '2023', '2024E'],
     'Ricavi (€M)': [911.91, 780.87, 845.11, 952.78, 1011.31, 1037.0],
@@ -125,14 +125,14 @@ df_fin_clean = pd.DataFrame({
     'Utile Netto (€M)': [118.43, 54.28, 78.37, 105.0, 112.92, 126.0],
     'EPS (€)': [0.22, 0.10, 0.14, 0.19, 0.21, 0.23],
     'FCF (€M)': [225.32, -264.55, -242.78, 139.13, 100.14, 199.0],
-    'DPS (€)': [0.0, 0.0, 0.1081, 0.1967, 0.23, 0.27]
+    'DPS (€)': [0.21, 0.0, 0.1081, 0.1967, 0.23, 0.27]  # CORRETTO per il 2019
 })
 
-# Calcoliamo il payout ratio (DPS/EPS e DPS/FCF)
+# Calcoliamo il payout ratio (DPS/EPS e DPS/FCF) - CORRETTO per il 2019
 df_payout = pd.DataFrame({
     'Anno': [2019, 2020, 2021, 2022, 2023, 2024],
     'EPS (€)': [0.22, 0.10, 0.14, 0.19, 0.21, 0.23],
-    'DPS (€)': [0.0, 0.0, 0.1081, 0.1967, 0.23, 0.27],
+    'DPS (€)': [0.21, 0.0, 0.1081, 0.1967, 0.23, 0.27],  # CORRETTO per il 2019
     'FCF per Share (€)': [0.42, -0.49, -0.45, 0.26, 0.19, 0.37]
 })
 
@@ -140,10 +140,10 @@ df_payout['Payout Ratio (% di EPS)'] = (df_payout['DPS (€)'] / df_payout['EPS 
 df_payout['Payout Ratio (% di FCF)'] = (df_payout['DPS (€)'] / df_payout['FCF per Share (€)']) * 100
 df_payout.loc[df_payout['FCF per Share (€)'] <= 0, 'Payout Ratio (% di FCF)'] = 0  # Gestisce divisione per zero o FCF negativo
 
-# Dati proiezione dividendi futuri basati sul piano industriale
+# Dati proiezione dividendi futuri basati sul piano industriale - CORRETTO per il 2019
 df_dps_projection = pd.DataFrame({
     'Anno': [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029],
-    'DPS (€)': [0.0, 0.0, 0.1081, 0.1967, 0.23, 0.27, 0.28, 0.29, 0.30, 0.31, 0.32],
+    'DPS (€)': [0.21, 0.0, 0.1081, 0.1967, 0.23, 0.27, 0.28, 0.29, 0.30, 0.31, 0.32],  # CORRETTO per il 2019
     'Tipo': ['Storico', 'Storico', 'Storico', 'Storico', 'Storico', 'Proposto', 'Piano', 'Piano', 'Piano', 'Piano', 'Piano']
 })
 
@@ -244,7 +244,7 @@ st.subheader("📈 Analisi del Dividendo")
 # Layout a 2 colonne per i grafici
 col1, col2 = st.columns(2)
 
-# GRAFICO 1: Storico DPS - nella prima colonna
+# GRAFICO 1: Storico DPS - nella prima colonna - CORRETTO
 with col1:
     fig_dps = px.bar(
         df_dps,
@@ -267,6 +267,17 @@ with col1:
         arrowsize=1,
         arrowwidth=1,
         ax=-20, ay=-30
+    )
+    
+    fig_dps.add_annotation(
+        x=2019, y=0.21,
+        text="Dividendo<br>pre-Covid",
+        showarrow=True,
+        font=dict(size=10, color="navy"),
+        arrowhead=2,
+        arrowsize=1,
+        arrowwidth=1,
+        ax=-20, ay=-20
     )
     
     fig_dps.add_annotation(
